@@ -1,5 +1,5 @@
 import gsap from "gsap";
-import THREE from "three";
+import * as THREE from "three";
 import Queue from "./queue";
 import item from "./item";
 
@@ -13,17 +13,35 @@ export default class <T> extends Queue<T> {
     y: number;
     z: number;
 
-    duraion: number;
+    duration: number;
 
     private geometry: THREE.BoxGeometry;
     private material: THREE.Material;
     public mesh: THREE.Mesh;
 
-    constructor(material: THREE.Material) {
+    constructor(
+        material: THREE.Material,
+        width: number = 1,
+        height: number = 1,
+        depth: number = 1,
+        x: number = 1,
+        y: number = 1,
+        z: number = 1,
+        duration: number = 0
+    ) {
         super();
+
         this.material = material;
         this.geometry = new THREE.BoxGeometry();
         this.mesh = new THREE.Mesh(this.geometry, this.material);
+
+        this.width = width;
+        this.height = height;
+        this.depth = depth;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.duration = duration;
     }
 
     private wait(duration: number): Promise<void> {
@@ -32,8 +50,8 @@ export default class <T> extends Queue<T> {
 
     protected async playEnqueue(item: item<T>): Promise<void> {
         const width = this.items.map(item => item.width).reduce((a, b) => a + b, 0);
-        gsap.to(item.mesh.position, { x: this.x - width, y: this.y, z: this.z, duration: this.duraion });
-        return await this.wait(this.duraion);
+        gsap.to(item.mesh.position, { x: this.x - width, y: this.y, z: this.z, duration: this.duration });
+        return await this.wait(this.duration);
     }
 
     protected async playDequeue(): Promise<void> {
@@ -41,8 +59,8 @@ export default class <T> extends Queue<T> {
         if (!first) {
             return new Promise(() => { });
         } else {
-            gsap.to(first.mesh.position, { x: this.x + 100, y: this.y, z: this.z, duration: this.duraion });
-            return await this.wait(this.duraion);
+            gsap.to(first.mesh.position, { x: this.x + 100, y: this.y, z: this.z, duration: this.duration });
+            return await this.wait(this.duration);
         }
     }
 

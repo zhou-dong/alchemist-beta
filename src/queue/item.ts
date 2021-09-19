@@ -1,4 +1,4 @@
-import THREE from "three";
+import * as THREE from "three";
 import { Container } from "../commons";
 
 type Item<T> = { value: T } & Container;
