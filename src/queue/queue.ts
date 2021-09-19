@@ -1,49 +1,47 @@
-import gsap from "gsap";
-import THREE from "three";
-import Queue from "./abstract-queue";
-import item from "./item";
+import { Collection, Container } from "../commons";
+import Item from "./item";
 
-export default class <T> extends Queue<T> {
+interface Queue<T> extends Collection, Container {
+    items: Item<T>[];
+    enqueue(item: Item<T>): Promise<number>;
+    dequeue(): Promise<Item<T> | undefined>;
+};
 
-    width: number;
-    height: number;
-    depth: number;
+export default abstract class <T> implements Queue<T>{
 
-    x: number;
-    y: number;
-    z: number;
+    abstract width: number;
+    abstract height: number;
+    abstract depth: number;
 
-    duraion: number;
+    abstract x: number;
+    abstract y: number;
+    abstract z: number;
 
-    private geometry: THREE.BoxGeometry;
-    private material: THREE.Material;
-    public mesh: THREE.Mesh;
+    items: Item<T>[];
 
-    constructor(material: THREE.Material) {
-        super();
-        this.material = material;
-        this.geometry = new THREE.BoxGeometry();
-        this.mesh = new THREE.Mesh(this.geometry, this.material);
+    constructor() {
+        this.items = [];
     }
 
-    private wait(duration: number): Promise<void> {
-        return new Promise(resolve => setTimeout(resolve, duration));
+    protected abstract playEnqueue(item: Item<T>): Promise<void>;
+    protected abstract playDequeue(): Promise<void>;
+
+    async enqueue(item: Item<T>): Promise<number> {
+        await this.playEnqueue(item);
+        return new Promise(() => this.items.push(item));
     }
 
-    protected async playEnqueue(item: item<T>): Promise<void> {
-        const width = this.items.map(item => item.width).reduce((a, b) => a + b, 0);
-        gsap.to(item.mesh.position, { x: this.x - width, y: this.y, z: this.z, duration: this.duraion });
-        return await this.wait(this.duraion);
+    async dequeue(): Promise<Item<T> | undefined> {
+        await this.playDequeue();
+        return new Promise(() => this.items.shift());
     }
 
-    protected async playDequeue(): Promise<void> {
-        const first = this.items[0];
-        if (!first) {
-            return new Promise(() => { });
-        } else {
-            gsap.to(first.mesh.position, { x: this.x + 100, y: this.y, z: this.z, duration: this.duraion });
-            return await this.wait(this.duraion);
-        }
+    isEmpty(): Promise<boolean> {
+        return new Promise(() => this.items.length === 0);
+    }
+
+    size(): Promise<number> {
+        return new Promise(() => this.items.length);
     }
 
 }
