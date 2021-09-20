@@ -1,3 +1,4 @@
 import Queue from "./queue-impl";
+import Item from "./item";
 
-export default Queue;
+export { Item, Queue };

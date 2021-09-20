@@ -1,5 +1,4 @@
-import Queue from "../index";
-import Item from "../item";
+import { Item, Queue } from "../index";
 
 test("queue FIFO", async () => {
 
