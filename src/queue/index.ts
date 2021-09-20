@@ -1,1 +1,3 @@
-export * from "./queue-impl";
+import Queue from "./queue-impl";
+
+export default Queue;

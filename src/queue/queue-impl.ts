@@ -20,7 +20,7 @@ export default class <T> extends Queue<T> {
     public mesh: THREE.Mesh;
 
     constructor(
-        material: THREE.Material,
+        material: THREE.Material = new THREE.MeshBasicMaterial(),
         width: number = 1,
         height: number = 1,
         depth: number = 1,
@@ -51,16 +51,18 @@ export default class <T> extends Queue<T> {
     protected async playEnqueue(item: item<T>): Promise<void> {
         const width = this.items.map(item => item.width).reduce((a, b) => a + b, 0);
         gsap.to(item.mesh.position, { x: this.x - width, y: this.y, z: this.z, duration: this.duration });
-        return await this.wait(this.duration);
+        await this.wait(this.duration);
+        return Promise.resolve();
     }
 
     protected async playDequeue(): Promise<void> {
         const first = this.items[0];
         if (!first) {
-            return new Promise(() => { });
+            return Promise.resolve();
         } else {
             gsap.to(first.mesh.position, { x: this.x + 100, y: this.y, z: this.z, duration: this.duration });
-            return await this.wait(this.duration);
+            await this.wait(this.duration);
+            return Promise.resolve();
         }
     }
 

@@ -11,7 +11,7 @@ export default class <T> implements Item<T> {
     private material: THREE.Material;
     public mesh: THREE.Mesh;
 
-    constructor(value: T, material: THREE.Material) {
+    constructor(value: T, material: THREE.Material = new THREE.MeshBasicMaterial()) {
         this._value = value;
         this.material = material;
         this.geometry = new THREE.BoxGeometry();

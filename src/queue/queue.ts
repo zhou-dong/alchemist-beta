@@ -1,3 +1,4 @@
+import { resolve } from "path";
 import { Collection, Container } from "../commons";
 import Item from "./item";
 
@@ -28,12 +29,12 @@ export default abstract class <T> implements Queue<T>{
 
     async enqueue(item: Item<T>): Promise<number> {
         await this.playEnqueue(item);
-        return new Promise(() => this.items.push(item));
+        return new Promise(resolve => resolve(this.items.push(item)));
     }
 
     async dequeue(): Promise<Item<T> | undefined> {
         await this.playDequeue();
-        return new Promise(() => this.items.shift());
+        return new Promise(resolve => resolve(this.items.shift()));
     }
 
     isEmpty(): Promise<boolean> {
@@ -41,7 +42,7 @@ export default abstract class <T> implements Queue<T>{
     }
 
     size(): Promise<number> {
-        return new Promise(() => this.items.length);
+        return Promise.resolve(this.items.length);
     }
 
 }

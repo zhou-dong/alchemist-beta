@@ -16,7 +16,7 @@
         "fix": "gts fix",
         "prepare": "npm run compile",
         "pretest": "npm run compile",
-        "posttest": "npm run lint"
+        "posttest__1": "npm run lint"
     },
     "dependencies": {
         "gsap": "^3.7.1",
