@@ -1,1 +1,3 @@
-export * from "./queue";
+import Queue from "./queue";
+
+export { Queue }
