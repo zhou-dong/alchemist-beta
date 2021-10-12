@@ -1,29 +1,19 @@
 import * as THREE from "three";
-import { Cube } from "../commons";
+import { Cube as ICube } from "../cube";
 
-type Item<T> = { value: T } & Cube;
-
-export default class <T> implements Item<T> {
-
-    private _value: T;
+export class Cube implements ICube {
 
     private geometry: THREE.BoxGeometry;
     private material: THREE.Material;
     public mesh: THREE.Mesh;
 
-    constructor(value: T, material: THREE.Material = new THREE.MeshBasicMaterial()) {
-        this._value = value;
+    constructor(
+        geometry: THREE.BoxGeometry = new THREE.BoxGeometry(),
+        material: THREE.Material = new THREE.MeshBasicMaterial()
+    ) {
+        this.geometry = geometry;
         this.material = material;
-        this.geometry = new THREE.BoxGeometry();
         this.mesh = new THREE.Mesh(this.geometry, this.material);
-    }
-
-    public get value(): T {
-        return this._value;
-    }
-
-    public set value(v: T) {
-        this._value = v;
     }
 
     public get x(): number {
@@ -74,4 +64,4 @@ export default class <T> implements Item<T> {
         this.mesh.scale.setZ(v);
     }
 
-};
+}

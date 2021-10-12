@@ -1,4 +1,4 @@
-export type Container = {
+export type Cube = {
     width: number;
     height: number;
     depth: number;
