@@ -68,8 +68,6 @@ export default class <T> implements Queue<T>, Cube {
         z: number = 1,
         duration: number = 0
     ) {
-
-
         this.queueAlgo = new QueueAlgo<T>();
         this.items = [];
         this.material = material;
