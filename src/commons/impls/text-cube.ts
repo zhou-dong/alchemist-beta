@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { Cube } from "./cube";
-import { TextCube as ITextCube } from "../test-cube";
+import { TextCube as ITextCube } from "../text-cube";
 
 export class TextCube<T> extends Cube implements ITextCube<T> {
     private _value: T;
