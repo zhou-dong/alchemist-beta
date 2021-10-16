@@ -20,28 +20,26 @@ export default class <T> implements Queue<T>, Cube {
     }
 
     private async playDequeue(): Promise<void> {
-
-        const first = this.items[0];
-        if (!first) {
+        const head = this.items[0];
+        if (!head) {
             return Promise.resolve();
         } else {
-            gsap.to(first.mesh.position, { x: this.x + 100, y: this.y, z: this.z, duration: this.duration });
+            gsap.to(head.mesh.position, { x: this.x + 100, y: this.y, z: this.z, duration: this.duration });
             await this.wait(this.duration);
             return Promise.resolve();
         }
     }
 
     private playPeek(): Promise<void> {
-        throw new Error("Method not implemented.");
+        return Promise.resolve();
     }
 
     private playIsEmpty(): Promise<void> {
-        throw new Error("Method not implemented.");
+        return Promise.resolve();
     }
 
-
     private playSize(): Promise<void> {
-        throw new Error("Method not implemented.");
+        return Promise.resolve();
     }
 
     width: number;
