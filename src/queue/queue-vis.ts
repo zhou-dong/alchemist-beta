@@ -40,7 +40,7 @@ export default class <T> extends Cube implements Queue<T> {
             new THREE.BoxGeometry(),
             this._scene
         );
-        item.width = 2;
+        // item.width = 2;
         // item.height = 2;
         await this.playEnqueue(item);
         return this.items.enqueue(item);
@@ -98,7 +98,7 @@ export default class <T> extends Cube implements Queue<T> {
     }
 
     private async playDequeue(item: TextCube<T>): Promise<void> {
-        gsap.to(item.mesh.position, { x: this.x + 100, y: this.y, z: this.z, duration: this.duration });
+        gsap.to(item.mesh.position, { x: this.x + 10, y: this.y, z: this.z, duration: this.duration });
         await this.wait(this.duration);
         item.hide();
         return Promise.resolve();
