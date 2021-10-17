@@ -1,2 +1,2 @@
-import { Item, Queue } from "./queue";
-export { Item, Queue }
+import { Queue } from "./queue";
+export { Queue }

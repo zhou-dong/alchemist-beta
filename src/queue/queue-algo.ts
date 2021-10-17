@@ -1,6 +1,29 @@
-import Queue from "./queue";
+import { Iterable } from "../commons/iterable";
+import { Iterator } from "../commons/iterator";
+import IQueue from "./queue";
 
-export default class <T> implements Queue<T>{
+class QueueIterator<T> implements Iterator<T> {
+
+    private items: T[];
+    private current: number;
+
+    constructor(items: T[]) {
+        this.items = items;
+        this.current = 0;
+    }
+
+    hasNext(): boolean {
+        return this.current < this.items.length - 1;
+    }
+
+    next(): T {
+        const result = this.items[this.current];
+        this.current += 1;
+        return result;
+    }
+}
+
+export default class Queue<T> implements IQueue<T>, Iterable<T>{
 
     private elements: T[];
 
@@ -28,4 +51,7 @@ export default class <T> implements Queue<T>{
         return Promise.resolve(this.elements.length);
     }
 
+    iterator(): Iterator<T> {
+        return new QueueIterator<T>(this.elements);
+    }
 }

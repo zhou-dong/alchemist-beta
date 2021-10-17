@@ -3,14 +3,17 @@ import { Cube as ICube } from "../cube";
 
 export class Cube implements ICube {
 
+    private scene: THREE.Scene;
     private geometry: THREE.BoxGeometry;
     private material: THREE.Material;
-    public mesh: THREE.Mesh;
+    private mesh: THREE.Mesh;
 
     constructor(
-        geometry: THREE.BoxGeometry = new THREE.BoxGeometry(),
-        material: THREE.Material = new THREE.MeshBasicMaterial()
+        geometry: THREE.BoxGeometry,
+        material: THREE.Material,
+        scene: THREE.Scene
     ) {
+        this.scene = scene;
         this.geometry = geometry;
         this.material = material;
         this.mesh = new THREE.Mesh(this.geometry, this.material);
@@ -64,4 +67,11 @@ export class Cube implements ICube {
         this.mesh.scale.setZ(v);
     }
 
+    public show(): void {
+        this.scene.add(this.mesh);
+    }
+
+    public hide(): void {
+        this.scene.remove(this.mesh);
+    }
 }

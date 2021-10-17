@@ -1,36 +1,109 @@
 import gsap from "gsap";
 import * as THREE from "three";
-import Item from "./item";
-import { Cube } from "../commons";
+import { Cube, TextCube } from "../commons/three";
 import Queue from "./queue";
 import QueueAlgo from "./queue-algo";
 
-export default class <T> implements Queue<T>, Cube {
+export default class <T> extends Cube implements Queue<T> {
 
-    private items: Item<T>[];
-    private queueAlgo: QueueAlgo<T>;
+    private items: QueueAlgo<TextCube<T>>;
 
-    private async playEnqueue(t: T): Promise<void> {
-        const width = this.items.map(item => item.width).reduce((a, b) => a + b, 0);
-        const item = new Item<T>(t);
-        gsap.to(item.mesh.position, { x: this.x - width, y: this.y, z: this.z, duration: this.duration });
-        this.items.push(item);
+    private _scene: THREE.Scene;
+    private duration: number;
+    private nodeMaterial: THREE.Material;
+    private nodeTextMaterial: THREE.MeshPhongMaterial;
+    private nodeTextGeometryParameters: THREE.TextGeometryParameters;
+
+    constructor(
+        queueMaterial: THREE.Material,
+        nodeMaterial: THREE.Material,
+        nodeTextMaterial: THREE.MeshPhongMaterial,
+        nodeTextGeometryParameters: THREE.TextGeometryParameters,
+        scene: THREE.Scene,
+        duration: number = 0
+    ) {
+        super(new THREE.BoxGeometry(), queueMaterial, scene);
+        this.nodeMaterial = nodeMaterial;
+        this.nodeTextMaterial = nodeTextMaterial;
+        this.nodeTextGeometryParameters = nodeTextGeometryParameters;
+        this._scene = scene;
+        this.items = new QueueAlgo<TextCube<T>>();
+        this.duration = duration;
+    }
+
+    async enqueue(value: T): Promise<number> {
+        const item = new TextCube<T>(
+            value,
+            this.nodeTextMaterial,
+            this.nodeTextGeometryParameters,
+            this.nodeMaterial,
+            new THREE.BoxGeometry(),
+            this._scene
+        );
+        await this.playEnqueue(item);
+        return this.items.enqueue(item);
+    }
+
+    async dequeue(): Promise<T | undefined> {
+        const item = await this.items.dequeue();
+        if (item) {
+            await this.playDequeue(item);
+            return Promise.resolve(item.value)
+        } else {
+            return Promise.resolve(undefined);
+        }
+    }
+
+    async peek(): Promise<T | undefined> {
+        const item = await this.items.peek();
+        if (item) {
+            await this.playPeek(item);
+            return Promise.resolve(item.value);
+        } else {
+            return Promise.resolve(undefined);
+        }
+    }
+
+    async isEmpty(): Promise<boolean> {
+        await this.playIsEmpty();
+        return this.items.isEmpty();
+    }
+
+    async size(): Promise<number> {
+        await this.playSize();
+        return this.items.size();
+    }
+
+    private wait(duration: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, duration * 1000));
+    }
+
+    private getItemsLength(): number {
+        let result = 0;
+        const iterator = this.items.iterator();
+        while (iterator.hasNext()) {
+            result += iterator.next().width;
+        }
+        return result;
+    }
+
+    private async playEnqueue(item: TextCube<T>): Promise<void> {
+        const width = this.getItemsLength();
+        const position = { x: item.x, y: item.y, z: item.z };
+        item.show();
+        gsap.to(position, { x: this.x - width, y: this.y, z: this.z, duration: this.duration });
         await this.wait(this.duration);
         return Promise.resolve();
     }
 
-    private async playDequeue(): Promise<void> {
-        const head = this.items[0];
-        if (!head) {
-            return Promise.resolve();
-        } else {
-            gsap.to(head.mesh.position, { x: this.x + 100, y: this.y, z: this.z, duration: this.duration });
-            await this.wait(this.duration);
-            return Promise.resolve();
-        }
+    private async playDequeue(item: TextCube<T>): Promise<void> {
+        const position = { x: item.x, y: item.y, z: item.z };
+        gsap.to(position, { x: this.x + 100, y: this.y, z: this.z, duration: this.duration });
+        await this.wait(this.duration);
+        return Promise.resolve();
     }
 
-    private playPeek(): Promise<void> {
+    private playPeek(item: TextCube<T>): Promise<void> {
         return Promise.resolve();
     }
 
@@ -40,73 +113,5 @@ export default class <T> implements Queue<T>, Cube {
 
     private playSize(): Promise<void> {
         return Promise.resolve();
-    }
-
-    width: number;
-    height: number;
-    depth: number;
-
-    x: number;
-    y: number;
-    z: number;
-
-    duration: number;
-
-    private geometry: THREE.BoxGeometry;
-    private material: THREE.Material;
-    public mesh: THREE.Mesh;
-
-    constructor(
-        material: THREE.Material = new THREE.MeshBasicMaterial(),
-        width: number = 1,
-        height: number = 1,
-        depth: number = 1,
-        x: number = 1,
-        y: number = 1,
-        z: number = 1,
-        duration: number = 0
-    ) {
-        this.queueAlgo = new QueueAlgo<T>();
-        this.items = [];
-        this.material = material;
-        this.geometry = new THREE.BoxGeometry();
-        this.mesh = new THREE.Mesh(this.geometry, this.material);
-
-        this.width = width;
-        this.height = height;
-        this.depth = depth;
-        this.x = x;
-        this.y = y;
-        this.z = z;
-        this.duration = duration;
-    }
-
-    async enqueue(t: T): Promise<number> {
-        await this.playEnqueue(t);
-        return this.queueAlgo.enqueue(t);
-    }
-
-    async dequeue(): Promise<T | undefined> {
-        await this.playDequeue();
-        return this.queueAlgo.dequeue();
-    }
-
-    async peek(): Promise<T | undefined> {
-        await this.playPeek();
-        return this.queueAlgo.peek();
-    }
-
-    async isEmpty(): Promise<boolean> {
-        await this.playIsEmpty();
-        return this.queueAlgo.isEmpty();
-    }
-
-    async size(): Promise<number> {
-        await this.playSize();
-        return this.queueAlgo.size();
-    }
-
-    private wait(duration: number): Promise<void> {
-        return new Promise(resolve => setTimeout(resolve, duration * 1000));
     }
 }

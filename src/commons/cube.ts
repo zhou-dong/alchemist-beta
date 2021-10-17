@@ -1,4 +1,4 @@
-export type Cube = {
+export interface Cube {
     width: number;
     height: number;
     depth: number;
@@ -6,4 +6,7 @@ export type Cube = {
     x: number;
     y: number;
     z: number;
+
+    show(): void;
+    hide(): void;
 };
