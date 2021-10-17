@@ -40,6 +40,8 @@ export default class <T> extends Cube implements Queue<T> {
             new THREE.BoxGeometry(),
             this._scene
         );
+        item.width = 2;
+        // item.height = 2;
         await this.playEnqueue(item);
         return this.items.enqueue(item);
     }
@@ -78,7 +80,7 @@ export default class <T> extends Cube implements Queue<T> {
         return new Promise(resolve => setTimeout(resolve, duration * 1000));
     }
 
-    private getItemsLength(): number {
+    private sumItemsWidth(): number {
         let result = 0;
         const iterator = this.items.iterator();
         while (iterator.hasNext()) {
@@ -88,18 +90,17 @@ export default class <T> extends Cube implements Queue<T> {
     }
 
     private async playEnqueue(item: TextCube<T>): Promise<void> {
-        const width = this.getItemsLength();
-        const position = { x: item.x, y: item.y, z: item.z };
+        const width = this.sumItemsWidth();
         item.show();
-        gsap.to(position, { x: this.x - width, y: this.y, z: this.z, duration: this.duration });
+        gsap.to(item.mesh.position, { x: this.x - width, y: this.y, z: this.z, duration: this.duration });
         await this.wait(this.duration);
         return Promise.resolve();
     }
 
     private async playDequeue(item: TextCube<T>): Promise<void> {
-        const position = { x: item.x, y: item.y, z: item.z };
-        gsap.to(position, { x: this.x + 100, y: this.y, z: this.z, duration: this.duration });
+        gsap.to(item.mesh.position, { x: this.x + 100, y: this.y, z: this.z, duration: this.duration });
         await this.wait(this.duration);
+        item.hide();
         return Promise.resolve();
     }
 

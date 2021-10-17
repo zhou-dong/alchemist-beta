@@ -6,7 +6,7 @@ export class Cube implements ICube {
     private scene: THREE.Scene;
     private geometry: THREE.BoxGeometry;
     private material: THREE.Material;
-    private mesh: THREE.Mesh;
+    private _mesh: THREE.Mesh;
 
     constructor(
         geometry: THREE.BoxGeometry,
@@ -16,7 +16,11 @@ export class Cube implements ICube {
         this.scene = scene;
         this.geometry = geometry;
         this.material = material;
-        this.mesh = new THREE.Mesh(this.geometry, this.material);
+        this._mesh = new THREE.Mesh(this.geometry, this.material);
+    }
+
+    public get mesh(): THREE.Mesh {
+        return this._mesh;
     }
 
     public get x(): number {
@@ -44,7 +48,7 @@ export class Cube implements ICube {
     }
 
     public get width(): number {
-        return this.geometry.parameters.width;
+        return this.mesh.scale.x;
     }
 
     public set width(v: number) {
@@ -52,7 +56,7 @@ export class Cube implements ICube {
     }
 
     public get height(): number {
-        return this.geometry.parameters.height;
+        return this.mesh.scale.y;
     }
 
     public set height(v: number) {
@@ -60,7 +64,7 @@ export class Cube implements ICube {
     }
 
     public get depth(): number {
-        return this.geometry.parameters.depth;
+        return this.mesh.scale.z;
     }
 
     public set depth(v: number) {

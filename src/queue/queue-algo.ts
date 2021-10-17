@@ -13,7 +13,7 @@ class QueueIterator<T> implements Iterator<T> {
     }
 
     hasNext(): boolean {
-        return this.current < this.items.length - 1;
+        return this.current < this.items.length;
     }
 
     next(): T {
