@@ -83,9 +83,7 @@ export default class <T> implements Queue<T> {
             for (let i = 0; i < size; i++) {
                 const shellWidth: number = this.sumShellWidth();
                 const { x, y, z } = this.queuePosition;
-
                 const cube = new Cube(new THREE.BoxGeometry(), this.queueMaterial, this.scene);
-
                 cube.x = x - shellWidth;
                 cube.y = y;
                 cube.z = z;
@@ -104,7 +102,15 @@ export default class <T> implements Queue<T> {
             } else {
                 const size = queueSize - shellSize;
                 for (let i = 0; i < size; i++) {
+                    const shellWidth: number = this.sumShellWidth();
+                    const { x, y, z } = this.queuePosition;
                     const cube = new Cube(new THREE.BoxGeometry(), this.queueMaterial, this.scene);
+                    cube.x = x - shellWidth;
+                    cube.y = y;
+                    cube.z = z;
+                    cube.width = this.nodeWidth;
+                    cube.height = this.nodeHeight;
+                    cube.depth = this.nodeDepth;
                     cube.show();
                     await this.shell.enqueue(cube);
                 }
