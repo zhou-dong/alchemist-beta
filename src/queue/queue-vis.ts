@@ -14,13 +14,22 @@ export default class <T> extends Cube implements Queue<T> {
     private nodeTextMaterial: THREE.MeshPhongMaterial;
     private nodeTextGeometryParameters: THREE.TextGeometryParameters;
 
+    private queueInitSize: number;
+    private nodeWidth: number;
+    private nodeHeight: number;
+    private nodeDepth: number;
+
     constructor(
         queueMaterial: THREE.Material,
         nodeMaterial: THREE.Material,
         nodeTextMaterial: THREE.MeshPhongMaterial,
         nodeTextGeometryParameters: THREE.TextGeometryParameters,
         scene: THREE.Scene,
-        duration: number = 0
+        duration: number = 0,
+        queueInitSize: number = 5,
+        nodeWidth: number = 1,
+        nodeHeight: number = 1,
+        nodeDepth: number = 1
     ) {
         super(new THREE.BoxGeometry(), queueMaterial, scene);
         this.nodeMaterial = nodeMaterial;
@@ -29,9 +38,27 @@ export default class <T> extends Cube implements Queue<T> {
         this._scene = scene;
         this.items = new QueueAlgo<TextCube<T>>();
         this.duration = duration;
+
+        // set node width, height and depth
+        this.nodeWidth = nodeWidth;
+        this.nodeHeight = nodeHeight;
+        this.nodeDepth = nodeDepth;
+
+        // set queue width, height and depth
+        this.queueInitSize = queueInitSize;
+        this.width = queueInitSize * nodeWidth;
+        this.height = nodeHeight;
+        this.depth = nodeDepth;
     }
 
     async enqueue(value: T): Promise<number> {
+        const item = this.createItem(value);
+        await this.playEnqueue(item);
+        await this.updateQueueWidth();
+        return this.items.enqueue(item);
+    }
+
+    private createItem(value: T): TextCube<T> {
         const item = new TextCube<T>(
             value,
             this.nodeTextMaterial,
@@ -40,18 +67,29 @@ export default class <T> extends Cube implements Queue<T> {
             new THREE.BoxGeometry(),
             this._scene
         );
-        // item.width = 2;
-        // item.height = 2;
-        await this.playEnqueue(item);
-        return this.items.enqueue(item);
+        item.width = this.nodeWidth;
+        item.height = this.nodeHeight;
+        item.depth = this.nodeDepth;
+        return item;
+    }
+
+    private async updateQueueWidth() {
+        const queueSize: number = await this.items.size();
+        if (queueSize < this.queueInitSize) {
+            this.width = this.queueInitSize * this.nodeWidth;
+        } else {
+            this.width = queueSize * this.nodeWidth;
+        }
     }
 
     async dequeue(): Promise<T | undefined> {
         const item = await this.items.dequeue();
         if (item) {
             await this.playDequeue(item);
+            await this.updateQueueWidth();
             return Promise.resolve(item.value)
         } else {
+            await this.updateQueueWidth();
             return Promise.resolve(undefined);
         }
     }
