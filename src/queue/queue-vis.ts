@@ -7,6 +7,7 @@ import QueueAlgo from "./queue-algo";
 export default class <T> implements Queue<T> {
 
     private items: QueueAlgo<TextCube<T>>;
+    private queueShell: QueueAlgo<Cube>;
     private queuePosition: THREE.Vector3;
 
     private nodeMaterial: THREE.Material;
@@ -38,6 +39,7 @@ export default class <T> implements Queue<T> {
         this.nodeTextGeometryParameters = nodeTextGeometryParameters;
         this.scene = scene;
         this.items = new QueueAlgo<TextCube<T>>();
+        this.queueShell = new QueueAlgo<Cube>();
         this.duration = duration;
         this.nodeWidth = nodeWidth;
         this.nodeHeight = nodeHeight;
@@ -69,12 +71,15 @@ export default class <T> implements Queue<T> {
 
     private buildQueueShell(material: THREE.Material, shellSize: number) {
         const { x, y, z } = this.queuePosition;
-        const geometry = new THREE.BoxGeometry(this.nodeWidth * shellSize, this.nodeHeight, this.nodeDepth);
-        const cube = new Cube(geometry, material, this.scene);
-        cube.x = x;
-        cube.y = y;
-        cube.z = z;
-        cube.show();
+        for (let i = 0; i < shellSize; i++) {
+            const geometry = new THREE.BoxGeometry(this.nodeWidth, this.nodeHeight, this.nodeDepth);
+            const cube = new Cube(geometry, material, this.scene);
+            cube.x = x - this.nodeWidth * i;
+            cube.y = y;
+            cube.z = z;
+            cube.show();
+            this.queueShell.enqueue(cube);
+        }
     }
 
     async dequeue(): Promise<T | undefined> {
@@ -126,8 +131,12 @@ export default class <T> implements Queue<T> {
 
     private async playEnqueue(item: TextCube<T>): Promise<void> {
         const width = this.sumItemsWidth();
-        item.show();
         const { x, y, z } = this.queuePosition;
+        const shellSize = await this.queueShell.size();
+        item.x = Math.min(x - width * 2, x - shellSize * 2);
+        item.y = y;
+        item.z = z;
+        item.show();
         gsap.to(item.mesh.position, { x: x - width, y, z, duration: this.duration });
         await this.wait(this.duration);
         return Promise.resolve();
@@ -135,7 +144,19 @@ export default class <T> implements Queue<T> {
 
     private async playDequeue(item: TextCube<T>): Promise<void> {
         const { x, y, z } = this.queuePosition;
-        gsap.to(item.mesh.position, { x: x + 10, y, z: z, duration: this.duration });
+
+        // remove item from queue.
+        gsap.to(item.mesh.position, { x: x + 10, y, z, duration: this.duration });
+
+        // arrange exist items in queue.
+        let index = 0;
+        const iterator = this.items.iterator();
+        while (iterator.hasNext()) {
+            const current = iterator.next();
+            gsap.to(current.mesh.position, { x: x - this.nodeWidth * index, y, z, duration: this.duration });
+            index += 1;
+        }
+
         await this.wait(this.duration);
         item.hide();
         return Promise.resolve();
