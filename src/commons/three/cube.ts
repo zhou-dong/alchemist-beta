@@ -3,10 +3,10 @@ import { Cube as ICube } from "../cube";
 
 export class Cube implements ICube {
 
-    private scene: THREE.Scene;
+    protected scene: THREE.Scene;
     private geometry: THREE.BoxGeometry;
     private material: THREE.Material;
-    private _mesh: THREE.Mesh;
+    public mesh: THREE.Mesh;
 
     constructor(
         geometry: THREE.BoxGeometry,
@@ -16,11 +16,7 @@ export class Cube implements ICube {
         this.scene = scene;
         this.geometry = geometry;
         this.material = material;
-        this._mesh = new THREE.Mesh(this.geometry, this.material);
-    }
-
-    public get mesh(): THREE.Mesh {
-        return this._mesh;
+        this.mesh = new THREE.Mesh(this.geometry, this.material);
     }
 
     public get x(): number {

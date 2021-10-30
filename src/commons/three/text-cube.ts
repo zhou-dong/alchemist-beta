@@ -5,14 +5,11 @@ import { TextCube as ITextCube } from "../text-cube";
 export class TextCube<T> extends Cube implements ITextCube<T> {
 
     private _value: T;
-    private textGeometry: THREE.TextGeometry;
-    private textMaterial: THREE.MeshPhongMaterial;
-    private textMesh: THREE.Mesh;
-    private _scene: THREE.Scene;
+    public textMesh: THREE.Mesh;
 
     constructor(
         value: T,
-        textMaterial: THREE.MeshPhongMaterial,
+        textMaterial: THREE.Material,
         textGeometryParameters: THREE.TextGeometryParameters,
         cubeMaterial: THREE.Material,
         cubeGeometry: THREE.BoxGeometry,
@@ -20,10 +17,24 @@ export class TextCube<T> extends Cube implements ITextCube<T> {
     ) {
         super(cubeGeometry, cubeMaterial, scene);
         this._value = value;
-        this.textMaterial = textMaterial;
-        this.textGeometry = new THREE.TextGeometry(value + "", textGeometryParameters);
-        this.textMesh = new THREE.Mesh(this.textGeometry, this.textMaterial);
-        this._scene = scene;
+
+        const textGeometry = new THREE.TextGeometry(value + "", textGeometryParameters);
+        this.textMesh = new THREE.Mesh(textGeometry, textMaterial);
+    }
+
+    public set x(x: number) {
+        super.x = x;
+        this.textX = super.x;
+    }
+
+    public set y(y: number) {
+        super.y = y;
+        this.textY = super.y - this.height / 2;
+    }
+
+    public set z(z: number) {
+        super.z = z;
+        this.textZ = super.z;
     }
 
     public get value(): T {
@@ -56,11 +67,11 @@ export class TextCube<T> extends Cube implements ITextCube<T> {
 
     public show(): void {
         super.show();
-        this._scene.add(this.textMesh);
+        this.scene.add(this.textMesh);
     }
 
     public hide(): void {
         super.hide();
-        this._scene.remove(this.textMesh);
+        this.scene.remove(this.textMesh);
     }
 }

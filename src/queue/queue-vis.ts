@@ -11,7 +11,7 @@ export default class <T> implements Queue<T> {
     private queuePosition: THREE.Vector3;
 
     private nodeMaterial: THREE.Material;
-    private nodeTextMaterial: THREE.MeshPhongMaterial;
+    private nodeTextMaterial: THREE.Material;
     private nodeTextGeometryParameters: THREE.TextGeometryParameters;
     private nodeWidth: number;
     private nodeHeight: number;
@@ -25,7 +25,7 @@ export default class <T> implements Queue<T> {
         queuePosition: THREE.Vector3,
         queueShellSize: number,
         nodeMaterial: THREE.Material,
-        nodeTextMaterial: THREE.MeshPhongMaterial,
+        nodeTextMaterial: THREE.Material,
         nodeTextGeometryParameters: THREE.TextGeometryParameters,
         nodeWidth: number,
         nodeHeight: number,
@@ -133,27 +133,33 @@ export default class <T> implements Queue<T> {
         const width = this.sumItemsWidth();
         const { x, y, z } = this.queuePosition;
         const shellSize = await this.queueShell.size();
-        item.x = Math.min(x - width * 2, x - shellSize * 2);
+
+        item.x = x - shellSize - 10;//Math.min(x - width * 2, x - shellSize * 2);
         item.y = y;
         item.z = z;
         item.show();
-        gsap.to(item.mesh.position, { x: x - width, y, z, duration: this.duration });
+
+        gsap.to(item.mesh.position, { x: x - width, duration: this.duration });
+        gsap.to(item.textMesh.position, { x: x - width, duration: this.duration });
+
         await this.wait(this.duration);
         return Promise.resolve();
     }
 
     private async playDequeue(item: TextCube<T>): Promise<void> {
-        const { x, y, z } = this.queuePosition;
+        const { x } = this.queuePosition;
 
         // remove item from queue.
-        gsap.to(item.mesh.position, { x: x + 10, y, z, duration: this.duration });
+        gsap.to(item.mesh.position, { x: x + 10, duration: this.duration });
+        gsap.to(item.textMesh.position, { x: x + 10, duration: this.duration });
 
         // arrange exist items in queue.
         let index = 0;
         const iterator = this.items.iterator();
         while (iterator.hasNext()) {
             const current = iterator.next();
-            gsap.to(current.mesh.position, { x: x - this.nodeWidth * index, y, z, duration: this.duration });
+            gsap.to(current.mesh.position, { x: x - this.nodeWidth * index, duration: this.duration });
+            gsap.to(current.textMesh.position, { x: x - this.nodeWidth * index, duration: this.duration });
             index += 1;
         }
 
