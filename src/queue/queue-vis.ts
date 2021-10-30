@@ -7,7 +7,7 @@ import QueueAlgo from "./queue-algo";
 export default class <T> implements Queue<T> {
 
     private items: QueueAlgo<TextCube<T>>;
-    private shell: QueueAlgo<Cube>;
+    private queuePosition: THREE.Vector3;
 
     private nodeMaterial: THREE.Material;
     private nodeTextMaterial: THREE.MeshPhongMaterial;
@@ -16,46 +16,39 @@ export default class <T> implements Queue<T> {
     private nodeHeight: number;
     private nodeDepth: number;
 
-    private queueMaterial: THREE.Material;
-    private queueInitSize: number;
-    private queuePosition: THREE.Vector3;
-
     private scene: THREE.Scene;
     private duration: number;
 
     constructor(
         queueMaterial: THREE.Material,
         queuePosition: THREE.Vector3,
+        queueShellSize: number,
         nodeMaterial: THREE.Material,
         nodeTextMaterial: THREE.MeshPhongMaterial,
         nodeTextGeometryParameters: THREE.TextGeometryParameters,
+        nodeWidth: number,
+        nodeHeight: number,
+        nodeDepth: number,
         scene: THREE.Scene,
-        duration: number = 0,
-        queueInitSize: number = 5,
-        nodeWidth: number = 1,
-        nodeHeight: number = 1,
-        nodeDepth: number = 1
+        duration: number
     ) {
-        this.queueMaterial = queueMaterial;
         this.queuePosition = queuePosition;
         this.nodeMaterial = nodeMaterial;
         this.nodeTextMaterial = nodeTextMaterial;
         this.nodeTextGeometryParameters = nodeTextGeometryParameters;
         this.scene = scene;
         this.items = new QueueAlgo<TextCube<T>>();
-        this.shell = new QueueAlgo<Cube>();
         this.duration = duration;
         this.nodeWidth = nodeWidth;
         this.nodeHeight = nodeHeight;
         this.nodeDepth = nodeDepth;
-        this.queueInitSize = queueInitSize;
+        this.buildQueueShell(queueMaterial, queueShellSize);
     }
 
     async enqueue(value: T): Promise<number> {
         const item = this.createItem(value);
         await this.playEnqueue(item);
         const result = await this.items.enqueue(item);
-        await this.updateQueueShell();
         return result;
     }
 
@@ -74,58 +67,22 @@ export default class <T> implements Queue<T> {
         return item;
     }
 
-    async updateQueueShell() {
-        const queueSize: number = await this.items.size();
-        const shellSize: number = await this.shell.size();
-
-        if (shellSize < this.queueInitSize) {
-            const size = this.queueInitSize - shellSize;
-            for (let i = 0; i < size; i++) {
-                const shellWidth: number = this.sumShellWidth();
-                const { x, y, z } = this.queuePosition;
-                const cube = new Cube(new THREE.BoxGeometry(), this.queueMaterial, this.scene);
-                cube.x = x - shellWidth;
-                cube.y = y;
-                cube.z = z;
-                cube.width = this.nodeWidth;
-                cube.height = this.nodeHeight;
-                cube.depth = this.nodeDepth;
-                cube.show();
-                await this.shell.enqueue(cube);
-            }
-        } else {
-            if (shellSize > queueSize) {
-                const size = shellSize - queueSize;
-                for (let i = 0; i < size; i++) {
-                    await this.shell.dequeue();
-                }
-            } else {
-                const size = queueSize - shellSize;
-                for (let i = 0; i < size; i++) {
-                    const shellWidth: number = this.sumShellWidth();
-                    const { x, y, z } = this.queuePosition;
-                    const cube = new Cube(new THREE.BoxGeometry(), this.queueMaterial, this.scene);
-                    cube.x = x - shellWidth;
-                    cube.y = y;
-                    cube.z = z;
-                    cube.width = this.nodeWidth;
-                    cube.height = this.nodeHeight;
-                    cube.depth = this.nodeDepth;
-                    cube.show();
-                    await this.shell.enqueue(cube);
-                }
-            }
-        }
+    private buildQueueShell(material: THREE.Material, shellSize: number) {
+        const { x, y, z } = this.queuePosition;
+        const geometry = new THREE.BoxGeometry(this.nodeWidth * shellSize, this.nodeHeight, this.nodeDepth);
+        const cube = new Cube(geometry, material, this.scene);
+        cube.x = x;
+        cube.y = y;
+        cube.z = z;
+        cube.show();
     }
 
     async dequeue(): Promise<T | undefined> {
         const item = await this.items.dequeue();
         if (item) {
             await this.playDequeue(item);
-            await this.updateQueueShell();
             return Promise.resolve(item.value)
         } else {
-            await this.updateQueueShell();
             return Promise.resolve(undefined);
         }
     }
@@ -152,10 +109,6 @@ export default class <T> implements Queue<T> {
 
     private wait(duration: number): Promise<void> {
         return new Promise(resolve => setTimeout(resolve, duration * 1000));
-    }
-
-    private sumShellWidth(): number {
-        return this.sumQueueWidth(this.shell);
     }
 
     private sumItemsWidth(): number {
