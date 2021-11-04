@@ -6,7 +6,7 @@ import QueueAlgo from "./queue-algo";
 
 export default class <T> implements Queue<T> {
 
-    private items: QueueAlgo<TextCube<T>>;
+    private queue: QueueAlgo<TextCube<T>>;
     private queueShell: QueueAlgo<Cube>;
     private queuePosition: THREE.Vector3;
 
@@ -38,7 +38,7 @@ export default class <T> implements Queue<T> {
         this.nodeTextMaterial = nodeTextMaterial;
         this.nodeTextGeometryParameters = nodeTextGeometryParameters;
         this.scene = scene;
-        this.items = new QueueAlgo<TextCube<T>>();
+        this.queue = new QueueAlgo<TextCube<T>>();
         this.queueShell = new QueueAlgo<Cube>();
         this.duration = duration;
         this.nodeWidth = nodeWidth;
@@ -50,7 +50,7 @@ export default class <T> implements Queue<T> {
     async enqueue(value: T): Promise<number> {
         const item = this.createItem(value);
         await this.playEnqueue(item);
-        const result = await this.items.enqueue(item);
+        const result = await this.queue.enqueue(item);
         return result;
     }
 
@@ -83,7 +83,7 @@ export default class <T> implements Queue<T> {
     }
 
     async dequeue(): Promise<T | undefined> {
-        const item = await this.items.dequeue();
+        const item = await this.queue.dequeue();
         if (item) {
             await this.playDequeue(item);
             return Promise.resolve(item.value)
@@ -93,7 +93,7 @@ export default class <T> implements Queue<T> {
     }
 
     async peek(): Promise<T | undefined> {
-        const item = await this.items.peek();
+        const item = await this.queue.peek();
         if (item) {
             await this.playPeek(item);
             return Promise.resolve(item.value);
@@ -104,12 +104,12 @@ export default class <T> implements Queue<T> {
 
     async isEmpty(): Promise<boolean> {
         await this.playIsEmpty();
-        return this.items.isEmpty();
+        return this.queue.isEmpty();
     }
 
     async size(): Promise<number> {
         await this.playSize();
-        return this.items.size();
+        return this.queue.size();
     }
 
     private wait(duration: number): Promise<void> {
@@ -117,7 +117,7 @@ export default class <T> implements Queue<T> {
     }
 
     private sumItemsWidth(): number {
-        return this.sumQueueWidth(this.items);
+        return this.sumQueueWidth(this.queue);
     }
 
     private sumQueueWidth<R>(queue: QueueAlgo<Cube>): number {
@@ -155,7 +155,7 @@ export default class <T> implements Queue<T> {
 
         // arrange exist items in queue.
         let index = 0;
-        const iterator = this.items.iterator();
+        const iterator = this.queue.iterator();
         while (iterator.hasNext()) {
             const current = iterator.next();
             gsap.to(current.mesh.position, { x: x - this.nodeWidth * index, duration: this.duration });
