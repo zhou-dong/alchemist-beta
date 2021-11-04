@@ -1,6 +1,4 @@
-import { Iterable } from "../commons/iterable";
-import { Iterator } from "../commons/iterator";
-import { ArrayIterator } from "../commons/array-iterator";
+import { ArrayIterator, Iterator, Iterable } from "../commons";
 import IQueue from "./queue";
 
 export default class <T> implements IQueue<T>, Iterable<T>{

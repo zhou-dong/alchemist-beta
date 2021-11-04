@@ -1,6 +1,4 @@
-import { Iterable } from "../commons/iterable";
-import { Iterator } from "../commons/iterator";
-import { ArrayIterator } from "../commons/array-iterator";
+import { ArrayIterator, Iterator, Iterable } from "../commons";
 import IStack from "./stack";
 
 export default class <T> implements IStack<T>, Iterable<T>{

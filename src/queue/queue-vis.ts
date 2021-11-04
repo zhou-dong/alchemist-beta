@@ -1,6 +1,7 @@
 import gsap from "gsap";
 import * as THREE from "three";
 import { Cube, TextCube } from "../commons/three";
+import { wait } from "../commons";
 import Queue from "./queue";
 import QueueAlgo from "./queue-algo";
 
@@ -112,10 +113,6 @@ export default class <T> implements Queue<T> {
         return this.queue.size();
     }
 
-    private wait(duration: number): Promise<void> {
-        return new Promise(resolve => setTimeout(resolve, duration * 1000));
-    }
-
     private sumItemsWidth(): number {
         return this.sumQueueWidth(this.queue);
     }
@@ -142,7 +139,7 @@ export default class <T> implements Queue<T> {
         gsap.to(item.mesh.position, { x: x - width, duration: this.duration });
         gsap.to(item.textMesh.position, { x: x - width, duration: this.duration });
 
-        await this.wait(this.duration);
+        await wait(this.duration);
         return Promise.resolve();
     }
 
@@ -163,7 +160,7 @@ export default class <T> implements Queue<T> {
             index += 1;
         }
 
-        await this.wait(this.duration);
+        await wait(this.duration);
         item.hide();
         return Promise.resolve();
     }
