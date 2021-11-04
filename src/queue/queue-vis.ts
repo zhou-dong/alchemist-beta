@@ -51,8 +51,7 @@ export default class <T> implements Queue<T> {
     async enqueue(value: T): Promise<number> {
         const item = this.createItem(value);
         await this.playEnqueue(item);
-        const result = await this.queue.enqueue(item);
-        return result;
+        return this.queue.enqueue(item);
     }
 
     private createItem(value: T): TextCube<T> {
