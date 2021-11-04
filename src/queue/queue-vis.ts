@@ -5,7 +5,7 @@ import { wait } from '../commons';
 import Queue from './queue';
 import QueueAlgo from './queue-algo';
 
-export default class<T> implements Queue<T> {
+export default class <T> implements Queue<T> {
   private queue: QueueAlgo<TextCube<T>>;
   private queueShell: QueueAlgo<Cube>;
   private queuePosition: THREE.Vector3;
