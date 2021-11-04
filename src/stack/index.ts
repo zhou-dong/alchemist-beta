@@ -1,3 +1,3 @@
-import Stack from "./stack-vis";
+import Stack from './stack-vis';
 
 export { Stack };

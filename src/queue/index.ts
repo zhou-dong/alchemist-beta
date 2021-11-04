@@ -1,3 +1,3 @@
-import Queue from "./queue-vis";
+import Queue from './queue-vis';
 
 export { Queue };

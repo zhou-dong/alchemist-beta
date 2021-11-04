@@ -1,5 +1,5 @@
-import { Iterator } from "./iterator";
+import { Iterator } from './iterator';
 
 export interface Iterable<T> {
-    iterator(): Iterator<T>;
+  iterator(): Iterator<T>;
 }

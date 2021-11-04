@@ -1,12 +1,12 @@
 export interface Cube {
-    width: number;
-    height: number;
-    depth: number;
+  width: number;
+  height: number;
+  depth: number;
 
-    x: number;
-    y: number;
-    z: number;
+  x: number;
+  y: number;
+  z: number;
 
-    show(): void;
-    hide(): void;
-};
+  show(): void;
+  hide(): void;
+}
