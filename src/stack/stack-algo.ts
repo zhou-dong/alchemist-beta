@@ -1,9 +1,9 @@
 import { Iterable } from "../commons/iterable";
 import { Iterator } from "../commons/iterator";
 import { ArrayIterator } from "../commons/array-iterator";
-import IQueue from "./queue";
+import IStack from "./stack";
 
-export default class <T> implements IQueue<T>, Iterable<T>{
+export default class <T> implements IStack<T>, Iterable<T>{
 
     private elements: T[];
 
@@ -11,16 +11,16 @@ export default class <T> implements IQueue<T>, Iterable<T>{
         this.elements = [];
     }
 
-    enqueue(element: T): Promise<number> {
-        return Promise.resolve(this.elements.push(element));
+    push(t: T): Promise<number> {
+        return Promise.resolve(this.elements.push(t));
     }
 
-    dequeue(): Promise<T | undefined> {
-        return Promise.resolve(this.elements.shift());
+    pop(): Promise<T | undefined> {
+        return Promise.resolve(this.elements.pop());
     }
 
     peek(): Promise<T | undefined> {
-        return Promise.resolve(this.elements[0]);
+        return Promise.resolve(this.elements[this.elements.length - 1]);
     }
 
     isEmpty(): Promise<boolean> {
