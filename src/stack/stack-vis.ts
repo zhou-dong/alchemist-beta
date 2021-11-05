@@ -25,11 +25,11 @@ export default class<T> implements Stack<T> {
     nodeMaterial: THREE.Material,
     nodeTextMaterial: THREE.Material,
     nodeTextGeometryParameters: THREE.TextGeometryParameters,
+    scene: THREE.Scene,
+    duration: number,
     nodeWidth: number,
     nodeHeight: number,
-    nodeDepth: number,
-    scene: THREE.Scene,
-    duration: number
+    nodeDepth: number
   ) {
     this.stackPosition = stackPosition;
     this.nodeMaterial = nodeMaterial;
