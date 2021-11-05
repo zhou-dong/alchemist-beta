@@ -24,21 +24,6 @@ export class TextCube<T> extends Cube implements ITextCube<T> {
     this.textMesh = new THREE.Mesh(textGeometry, textMaterial);
   }
 
-  public set x(x: number) {
-    super.x = x;
-    this.textX = super.x;
-  }
-
-  public set y(y: number) {
-    super.y = y;
-    this.textY = super.y - this.height / 2;
-  }
-
-  public set z(z: number) {
-    super.z = z;
-    this.textZ = super.z;
-  }
-
   public get value(): T {
     return this._value;
   }
