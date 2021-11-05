@@ -29,9 +29,9 @@ export default class<T> implements Queue<T> {
     nodeTextGeometryParameters: THREE.TextGeometryParameters,
     scene: THREE.Scene,
     duration: number,
-    nodeWidth = 1,
-    nodeHeight = 1,
-    nodeDepth = 1
+    nodeWidth: number,
+    nodeHeight: number,
+    nodeDepth: number
   ) {
     this.queuePosition = queuePosition;
     this.nodeMaterial = nodeMaterial;
