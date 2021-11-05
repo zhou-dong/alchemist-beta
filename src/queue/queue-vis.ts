@@ -54,7 +54,7 @@ export default class<T> implements Queue<T> {
   }
 
   private createItem(value: T): TextCube<T> {
-    const item = new TextCube<T>(
+    return new TextCube<T>(
       value,
       this.nodeTextMaterial,
       this.nodeTextGeometryParameters,
@@ -62,10 +62,6 @@ export default class<T> implements Queue<T> {
       this.buildBoxGeometry(),
       this.scene
     );
-    item.width = this.nodeWidth;
-    item.height = this.nodeHeight;
-    item.depth = this.nodeDepth;
-    return item;
   }
 
   private buildBoxGeometry(): THREE.BoxGeometry {
