@@ -27,11 +27,11 @@ export default class<T> implements Queue<T> {
     nodeMaterial: THREE.Material,
     nodeTextMaterial: THREE.Material,
     nodeTextGeometryParameters: THREE.TextGeometryParameters,
-    nodeWidth: number,
-    nodeHeight: number,
-    nodeDepth: number,
     scene: THREE.Scene,
-    duration: number
+    duration: number,
+    nodeWidth = 1,
+    nodeHeight = 1,
+    nodeDepth = 1
   ) {
     this.queuePosition = queuePosition;
     this.nodeMaterial = nodeMaterial;
@@ -59,7 +59,7 @@ export default class<T> implements Queue<T> {
       this.nodeTextMaterial,
       this.nodeTextGeometryParameters,
       this.nodeMaterial,
-      new THREE.BoxGeometry(),
+      this.buildBoxGeometry(),
       this.scene
     );
     item.width = this.nodeWidth;
@@ -68,15 +68,18 @@ export default class<T> implements Queue<T> {
     return item;
   }
 
+  private buildBoxGeometry(): THREE.BoxGeometry {
+    return new THREE.BoxGeometry(
+      this.nodeWidth,
+      this.nodeHeight,
+      this.nodeDepth
+    );
+  }
+
   private buildQueueShell(material: THREE.Material, shellSize: number) {
     const { x, y, z } = this.queuePosition;
     for (let i = 0; i < shellSize; i++) {
-      const geometry = new THREE.BoxGeometry(
-        this.nodeWidth,
-        this.nodeHeight,
-        this.nodeDepth
-      );
-      const cube = new Cube(geometry, material, this.scene);
+      const cube = new Cube(this.buildBoxGeometry(), material, this.scene);
       cube.x = x - this.nodeWidth * i;
       cube.y = y;
       cube.z = z;
@@ -128,18 +131,32 @@ export default class<T> implements Queue<T> {
     return result;
   }
 
+  private adjustTextX(x: number): number {
+    return x - this.nodeWidth / 2.7;
+  }
+
   private async playEnqueue(item: TextCube<T>): Promise<void> {
     const width = this.sumItemsWidth();
     const { x, y, z } = this.queuePosition;
-    const shellSize = await this.queueShell.size();
 
-    item.x = x - shellSize - 10; //Math.min(x - width * 2, x - shellSize * 2);
+    const startX = x - this.nodeWidth * 10;
+    const startTextX = this.adjustTextX(startX);
+
+    const endX = x - width;
+    const endTextX = this.adjustTextX(endX);
+
+    item.x = startX;
     item.y = y;
     item.z = z;
+
+    item.textX = startTextX;
+    item.textY = y - item.height / 2;
+    item.textZ = z;
+
     item.show();
 
-    gsap.to(item.mesh.position, { x: x - width, duration: this.duration });
-    gsap.to(item.textMesh.position, { x: x - width, duration: this.duration });
+    gsap.to(item.mesh.position, { x: endX, duration: this.duration });
+    gsap.to(item.textMesh.position, { x: endTextX, duration: this.duration });
 
     await wait(this.duration);
     return Promise.resolve();
@@ -148,21 +165,28 @@ export default class<T> implements Queue<T> {
   private async playDequeue(item: TextCube<T>): Promise<void> {
     const { x } = this.queuePosition;
 
+    const endX = x + 10;
+    const endTextX = this.adjustTextX(endX);
+
     // remove item from queue.
-    gsap.to(item.mesh.position, { x: x + 10, duration: this.duration });
-    gsap.to(item.textMesh.position, { x: x + 10, duration: this.duration });
+    gsap.to(item.mesh.position, { x: endX, duration: this.duration });
+    gsap.to(item.textMesh.position, { x: endTextX, duration: this.duration });
 
     // arrange exist items in queue.
     let index = 0;
     const iterator = this.queue.iterator();
     while (iterator.hasNext()) {
       const current = iterator.next();
+
+      const newX = x - this.nodeWidth * index;
+      const newTextX = this.adjustTextX(newX);
+
       gsap.to(current.mesh.position, {
-        x: x - this.nodeWidth * index,
+        x: newX,
         duration: this.duration,
       });
       gsap.to(current.textMesh.position, {
-        x: x - this.nodeWidth * index,
+        x: newTextX,
         duration: this.duration,
       });
       index += 1;
