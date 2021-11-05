@@ -48,12 +48,7 @@ export default class<T> implements Stack<T> {
   private buildStackShell(material: THREE.Material, shellSize: number) {
     const { x, y, z } = this.stackPosition;
     for (let i = 0; i < shellSize; i++) {
-      const geometry = new THREE.BoxGeometry(
-        this.nodeWidth,
-        this.nodeHeight,
-        this.nodeDepth
-      );
-      const cube = new Cube(geometry, material, this.scene);
+      const cube = new Cube(this.buildBoxGeometry(), material, this.scene);
       cube.x = x - this.nodeWidth * i;
       cube.y = y;
       cube.z = z;
@@ -69,18 +64,22 @@ export default class<T> implements Stack<T> {
   }
 
   private createItem(value: T): TextCube<T> {
-    const item = new TextCube<T>(
+    return new TextCube<T>(
       value,
       this.nodeTextMaterial,
       this.nodeTextGeometryParameters,
       this.nodeMaterial,
-      new THREE.BoxGeometry(),
+      this.buildBoxGeometry(),
       this.scene
     );
-    item.width = this.nodeWidth;
-    item.height = this.nodeHeight;
-    item.depth = this.nodeDepth;
-    return item;
+  }
+
+  private buildBoxGeometry(): THREE.BoxGeometry {
+    return new THREE.BoxGeometry(
+      this.nodeWidth,
+      this.nodeHeight,
+      this.nodeDepth
+    );
   }
 
   async pop(): Promise<T | undefined> {
