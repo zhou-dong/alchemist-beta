@@ -1,5 +1,7 @@
+import gsap from 'gsap';
 import * as THREE from 'three';
 import { Cube, TextCube } from '../commons/three';
+import { wait } from '../commons';
 import Stack from './stack';
 import StackAlgo from './stack-algo';
 
@@ -7,10 +9,12 @@ export default class<T> implements Stack<T> {
   private stack: StackAlgo<TextCube<T>>;
   private stackShell: StackAlgo<Cube>;
   private stackPosition: THREE.Vector3;
+  private stackShellSize: number;
 
   private nodeMaterial: THREE.Material;
   private nodeTextMaterial: THREE.Material;
   private nodeTextGeometryParameters: THREE.TextGeometryParameters;
+  private nodeInitPosition: THREE.Vector3;
   private nodeWidth: number;
   private nodeHeight: number;
   private nodeDepth: number;
@@ -25,29 +29,32 @@ export default class<T> implements Stack<T> {
     nodeMaterial: THREE.Material,
     nodeTextMaterial: THREE.Material,
     nodeTextGeometryParameters: THREE.TextGeometryParameters,
-    scene: THREE.Scene,
-    duration: number,
+    nodeInitPosition: THREE.Vector3,
     nodeWidth: number,
     nodeHeight: number,
-    nodeDepth: number
+    nodeDepth: number,
+    scene: THREE.Scene,
+    duration: number
   ) {
     this.stackPosition = stackPosition;
+    this.stackShellSize = stackShellSize;
     this.nodeMaterial = nodeMaterial;
     this.nodeTextMaterial = nodeTextMaterial;
     this.nodeTextGeometryParameters = nodeTextGeometryParameters;
-    this.scene = scene;
-    this.duration = duration;
+    this.nodeInitPosition = nodeInitPosition;
     this.nodeWidth = nodeWidth;
     this.nodeHeight = nodeHeight;
     this.nodeDepth = nodeDepth;
+    this.scene = scene;
+    this.duration = duration;
     this.stack = new StackAlgo();
     this.stackShell = new StackAlgo();
-    this.buildStackShell(stackMaterial, stackShellSize);
+    this.buildStackShell(stackMaterial);
   }
 
-  private buildStackShell(material: THREE.Material, shellSize: number) {
+  private buildStackShell(material: THREE.Material) {
     const { x, y, z } = this.stackPosition;
-    for (let i = 0; i < shellSize; i++) {
+    for (let i = 0; i < this.stackShellSize; i++) {
       const cube = new Cube(this.buildBoxGeometry(), material, this.scene);
       cube.x = x - this.nodeWidth * i;
       cube.y = y;
@@ -104,11 +111,102 @@ export default class<T> implements Stack<T> {
     return this.stack.size();
   }
 
-  private playPush(item: TextCube<T>): Promise<void> {
+  private adjustTextX(x: number): number {
+    return x - this.nodeWidth / 2.7;
+  }
+
+  private adjustTextY(y: number): number {
+    return y - this.nodeHeight / 2;
+  }
+
+  private async playPush(item: TextCube<T>): Promise<void> {
+    const iterator = this.stack.iterator();
+    while (iterator.hasNext()) {
+      const current = iterator.next();
+
+      const nodeNewX = current.x + this.nodeWidth;
+      const textNewX = this.adjustTextX(nodeNewX);
+
+      gsap.to(current.mesh.position, {
+        x: nodeNewX,
+        duration: this.duration,
+      });
+
+      gsap.to(current.textMesh.position, {
+        x: textNewX,
+        duration: this.duration,
+      });
+    }
+
+    item.x = this.nodeInitPosition.x;
+    item.y = this.nodeInitPosition.y;
+    item.z = this.nodeInitPosition.z;
+
+    item.textX = this.adjustTextX(item.x);
+    item.textY = this.adjustTextY(item.y);
+    item.textZ = item.z;
+
+    const nodeEndPosition = this.stackPosition.clone().setX(this.getTopX());
+
+    const textEndPosition = this.stackPosition
+      .clone()
+      .setX(this.adjustTextX(nodeEndPosition.x))
+      .setY(this.adjustTextY(nodeEndPosition.y));
+
+    gsap.to(item.mesh.position, {
+      ...nodeEndPosition,
+      duration: this.duration,
+    });
+
+    gsap.to(item.textMesh.position, {
+      ...textEndPosition,
+      duration: this.duration,
+    });
+
+    await wait(this.duration);
     return Promise.resolve();
   }
 
+  private getTopX(): number {
+    const { x } = this.stackPosition;
+    const size = this.stackShellSize;
+    return x - this.nodeWidth * (size - 1);
+  }
+
   private playPop(item: TextCube<T> | undefined): Promise<void> {
+    if (item) {
+      return this.playPopItem(item);
+    } else {
+      return Promise.resolve();
+    }
+  }
+
+  private async playPopItem(item: TextCube<T>): Promise<void> {
+    const endX = this.getTopX() - 10;
+    const endTextX = this.adjustTextX(endX);
+
+    gsap.to(item.mesh.position, { x: endX, duration: this.duration });
+    gsap.to(item.textMesh.position, { x: endTextX, duration: this.duration });
+
+    const iterator = this.stack.iterator();
+    while (iterator.hasNext()) {
+      const current = iterator.next();
+
+      const nodeNewX = current.x - this.nodeWidth;
+      const textNewX = this.adjustTextX(nodeNewX);
+
+      gsap.to(current.mesh.position, {
+        x: nodeNewX,
+        duration: this.duration,
+      });
+      gsap.to(current.textMesh.position, {
+        x: textNewX,
+        duration: this.duration,
+      });
+    }
+
+    await wait(this.duration);
+    item.hide();
     return Promise.resolve();
   }
 
