@@ -201,6 +201,7 @@ export default class<T> implements Queue<T> {
         x: textNewX,
         duration: this.duration,
       });
+
       index += 1;
     }
 
