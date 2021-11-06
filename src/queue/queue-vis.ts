@@ -190,15 +190,15 @@ export default class<T> implements Queue<T> {
     while (iterator.hasNext()) {
       const current = iterator.next();
 
-      const newX = x - this.nodeWidth * index;
-      const newTextX = this.adjustTextX(newX);
+      const nodeNewX = x - this.nodeWidth * index;
+      const textNewX = this.adjustTextX(nodeNewX);
 
       gsap.to(current.mesh.position, {
-        x: newX,
+        x: nodeNewX,
         duration: this.duration,
       });
       gsap.to(current.textMesh.position, {
-        x: newTextX,
+        x: textNewX,
         duration: this.duration,
       });
       index += 1;
