@@ -146,6 +146,8 @@ export default class<T> implements Stack<T> {
     item.textY = this.adjustTextY(item.y);
     item.textZ = item.z;
 
+    item.show();
+
     const nodeEndPosition = this.stackPosition.clone().setX(this.getTopX());
 
     const textEndPosition = this.stackPosition
