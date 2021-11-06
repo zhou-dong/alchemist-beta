@@ -13,6 +13,7 @@ export default class<T> implements Queue<T> {
   private nodeMaterial: THREE.Material;
   private nodeTextMaterial: THREE.Material;
   private nodeTextGeometryParameters: THREE.TextGeometryParameters;
+  private nodeInitPosition: THREE.Vector3;
   private nodeWidth: number;
   private nodeHeight: number;
   private nodeDepth: number;
@@ -27,23 +28,25 @@ export default class<T> implements Queue<T> {
     nodeMaterial: THREE.Material,
     nodeTextMaterial: THREE.Material,
     nodeTextGeometryParameters: THREE.TextGeometryParameters,
-    scene: THREE.Scene,
-    duration: number,
+    nodeInitPosition: THREE.Vector3,
     nodeWidth: number,
     nodeHeight: number,
-    nodeDepth: number
+    nodeDepth: number,
+    scene: THREE.Scene,
+    duration: number
   ) {
     this.queuePosition = queuePosition;
     this.nodeMaterial = nodeMaterial;
     this.nodeTextMaterial = nodeTextMaterial;
     this.nodeTextGeometryParameters = nodeTextGeometryParameters;
+    this.nodeInitPosition = nodeInitPosition;
+    this.nodeWidth = nodeWidth;
+    this.nodeHeight = nodeHeight;
+    this.nodeDepth = nodeDepth;
     this.scene = scene;
     this.queue = new QueueAlgo<TextCube<T>>();
     this.queueShell = new QueueAlgo<Cube>();
     this.duration = duration;
-    this.nodeWidth = nodeWidth;
-    this.nodeHeight = nodeHeight;
-    this.nodeDepth = nodeDepth;
     this.buildQueueShell(queueMaterial, queueShellSize);
   }
 
@@ -131,28 +134,41 @@ export default class<T> implements Queue<T> {
     return x - this.nodeWidth / 2.7;
   }
 
+  private adjustTextY(y: number): number {
+    return y - this.nodeHeight / 2;
+  }
+
   private async playEnqueue(item: TextCube<T>): Promise<void> {
     const width = this.sumItemsWidth();
-    const { x, y, z } = this.queuePosition;
 
-    const startX = x - this.nodeWidth * 10;
-    const startTextX = this.adjustTextX(startX);
+    item.x = this.nodeInitPosition.x;
+    item.y = this.nodeInitPosition.y;
+    item.z = this.nodeInitPosition.z;
 
-    const endX = x - width;
-    const endTextX = this.adjustTextX(endX);
+    item.textX = this.adjustTextX(item.x);
+    item.textY = this.adjustTextY(item.y);
+    item.textZ = item.z;
 
-    item.x = startX;
-    item.y = y;
-    item.z = z;
+    const nodeEndPosition = this.queuePosition
+      .clone()
+      .setX(this.queuePosition.x - width);
 
-    item.textX = startTextX;
-    item.textY = y - item.height / 2;
-    item.textZ = z;
+    const textEndPosition = this.queuePosition
+      .clone()
+      .setX(this.adjustTextX(nodeEndPosition.x))
+      .setY(this.adjustTextY(nodeEndPosition.y));
 
     item.show();
 
-    gsap.to(item.mesh.position, { x: endX, duration: this.duration });
-    gsap.to(item.textMesh.position, { x: endTextX, duration: this.duration });
+    gsap.to(item.mesh.position, {
+      ...nodeEndPosition,
+      duration: this.duration,
+    });
+
+    gsap.to(item.textMesh.position, {
+      ...textEndPosition,
+      duration: this.duration,
+    });
 
     await wait(this.duration);
     return Promise.resolve();
