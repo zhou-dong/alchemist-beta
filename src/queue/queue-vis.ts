@@ -14,6 +14,7 @@ export default class<T> implements Queue<T> {
   private nodeTextMaterial: THREE.Material;
   private nodeTextGeometryParameters: THREE.TextGeometryParameters;
   private nodeInitPosition: THREE.Vector3;
+  private nodeTextAdjust: THREE.Vector3;
   private nodeWidth: number;
   private nodeHeight: number;
   private nodeDepth: number;
@@ -29,6 +30,7 @@ export default class<T> implements Queue<T> {
     nodeTextMaterial: THREE.Material,
     nodeTextGeometryParameters: THREE.TextGeometryParameters,
     nodeInitPosition: THREE.Vector3,
+    nodeTextAdjust: THREE.Vector3,
     nodeWidth: number,
     nodeHeight: number,
     nodeDepth: number,
@@ -40,6 +42,7 @@ export default class<T> implements Queue<T> {
     this.nodeTextMaterial = nodeTextMaterial;
     this.nodeTextGeometryParameters = nodeTextGeometryParameters;
     this.nodeInitPosition = nodeInitPosition;
+    this.nodeTextAdjust = nodeTextAdjust;
     this.nodeWidth = nodeWidth;
     this.nodeHeight = nodeHeight;
     this.nodeDepth = nodeDepth;
@@ -131,11 +134,11 @@ export default class<T> implements Queue<T> {
   }
 
   private adjustTextX(x: number): number {
-    return x - this.nodeWidth / 2.7;
+    return x - this.nodeWidth / 2.7 + this.nodeTextAdjust.x;
   }
 
   private adjustTextY(y: number): number {
-    return y - this.nodeHeight / 2;
+    return y - this.nodeHeight / 2 + this.nodeTextAdjust.y;
   }
 
   private async playEnqueue(item: TextCube<T>): Promise<void> {
