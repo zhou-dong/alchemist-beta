@@ -9,13 +9,13 @@ todos:
 npx gts fix
 ```
 
-|    Items    | Status            |
-| :---------: | ----------------- |
-|    Stack    | :construction:    |
-|    Queue    | 🚧 :construction: |
-|    Array    |                   |
-| Linked List |                   |
-|    Heap     |                   |
-|    Tree     |                   |
-|   Hashing   |                   |
-|    Graph    |                   |
+|    Items    | Status | Progress |
+| :---------: | ------ | -------- |
+|    Stack    | 🚧     | 70%      |
+|    Queue    | 🚧     | 70%      |
+|    Array    | 🚧     | 0%       |
+| Linked List | 🏁     | 0%       |
+|    Heap     | 🏁     | 0%       |
+|    Tree     | 🏁     | 0%       |
+|   Hashing   | 🏁     | 0%       |
+|    Graph    | 🏁     | 0%       |
