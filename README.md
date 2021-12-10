@@ -1,14 +1,5 @@
 # alchemist-beta
 
-todos:
-
-- we might want to add demo folder to demonstrate how to use this library.
-
-```bash
-# prettier
-npx gts fix
-```
-
 |    Items    | Status | Progress |
 | :---------: | ------ | -------- |
 |    Stack    | 🚧     | 70%      |
@@ -19,3 +10,10 @@ npx gts fix
 |    Tree     | 🏁     | 0%       |
 |   Hashing   | 🏁     | 0%       |
 |    Graph    | 🏁     | 0%       |
+
+- we might want to add demo folder to demonstrate how to use this library.
+
+```bash
+# prettier
+npx gts fix
+```
