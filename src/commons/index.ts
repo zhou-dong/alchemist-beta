@@ -5,3 +5,4 @@ export * from './utils';
 export * from './iterator';
 export * from './iterable';
 export * from './array-iterator';
+export * from './abstract-array';

@@ -5,7 +5,7 @@ import { wait } from '../commons';
 import Stack from './stack';
 import StackAlgo from './stack-algo';
 
-export default class<T> implements Stack<T> {
+export default class StackVis<T> implements Stack<T> {
   private stack: StackAlgo<TextCube<T>>;
   private stackShell: StackAlgo<Cube>;
   private stackPosition: THREE.Vector3;
