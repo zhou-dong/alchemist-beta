@@ -67,10 +67,33 @@ export default class StackVis<T> implements Stack<T> {
     }
   }
 
-  async push(t: T): Promise<number> {
-    const item = this.createItem(t);
-    await this.playPush(item);
+  async push(value: T): Promise<number> {
+    const item = this.createAndInitItemPosition(value);
+    await this.playPushElements([item]);
     return this.stack.push(item);
+  }
+
+  async pushElements(elements: T[]): Promise<void> {
+    const items = elements.map(e => this.createAndInitItemPosition(e));
+    await this.playPushElements(items);
+    items.map(item => this.stack.push(item));
+  }
+
+  private async playPushElements(items: TextCube<T>[]): Promise<void> {
+    await this.shiftNodesForPush(items.length);
+
+    items.map((item, i) => {
+      item.show();
+      this.move(item, this.getTopX() + (items.length - 1 - i) * this.nodeWidth);
+    });
+
+    await wait(this.duration);
+  }
+
+  private createAndInitItemPosition(value: T): TextCube<T> {
+    const item = this.createItem(value);
+    this.initItemPosition(item);
+    return item;
   }
 
   private createItem(value: T): TextCube<T> {
@@ -82,6 +105,23 @@ export default class StackVis<T> implements Stack<T> {
       this.buildBoxGeometry(),
       this.scene
     );
+  }
+
+  private initItemPosition(item: TextCube<T>): void {
+    this.initItemNodePosition(item);
+    this.initItemTextPosition(item);
+  }
+
+  private initItemNodePosition(item: TextCube<T>): void {
+    item.x = this.nodeInitPosition.x;
+    item.y = this.nodeInitPosition.y;
+    item.z = this.nodeInitPosition.z;
+  }
+
+  private initItemTextPosition(item: TextCube<T>): void {
+    item.textX = this.adjustTextX(item.x);
+    item.textY = this.adjustTextY(item.y);
+    item.textZ = item.z;
   }
 
   private buildBoxGeometry(): THREE.BoxGeometry {
@@ -122,54 +162,21 @@ export default class StackVis<T> implements Stack<T> {
     return y - this.nodeHeight / 2 + this.nodeTextAdjust.y;
   }
 
-  private async playPush(item: TextCube<T>): Promise<void> {
+  private async shiftNodesForPush(nodes: number): Promise<void> {
     const iterator = this.stack.iterator();
     while (iterator.hasNext()) {
       const current = iterator.next();
-
-      const nodeNewX = current.x + this.nodeWidth;
-      const textNewX = this.adjustTextX(nodeNewX);
-
-      gsap.to(current.mesh.position, {
-        x: nodeNewX,
-        duration: this.duration,
-      });
-
-      gsap.to(current.textMesh.position, {
-        x: textNewX,
-        duration: this.duration,
-      });
+      this.move(current, current.x + this.nodeWidth * nodes);
     }
 
-    item.x = this.nodeInitPosition.x;
-    item.y = this.nodeInitPosition.y;
-    item.z = this.nodeInitPosition.z;
-
-    item.textX = this.adjustTextX(item.x);
-    item.textY = this.adjustTextY(item.y);
-    item.textZ = item.z;
-
-    item.show();
-
-    const nodeEndPosition = this.stackPosition.clone().setX(this.getTopX());
-
-    const textEndPosition = this.stackPosition
-      .clone()
-      .setX(this.adjustTextX(nodeEndPosition.x))
-      .setY(this.adjustTextY(nodeEndPosition.y));
-
-    gsap.to(item.mesh.position, {
-      ...nodeEndPosition,
-      duration: this.duration,
-    });
-
-    gsap.to(item.textMesh.position, {
-      ...textEndPosition,
-      duration: this.duration,
-    });
-
     await wait(this.duration);
-    return Promise.resolve();
+  }
+
+  private move(item: TextCube<T>, nodeX: number): void {
+    const textX = this.adjustTextX(nodeX);
+
+    gsap.to(item.mesh.position, { x: nodeX, duration: this.duration });
+    gsap.to(item.textMesh.position, { x: textX, duration: this.duration });
   }
 
   private getTopX(): number {
@@ -187,32 +194,16 @@ export default class StackVis<T> implements Stack<T> {
   }
 
   private async playPopItem(item: TextCube<T>): Promise<void> {
-    const endX = this.getTopX() - 10;
-    const endTextX = this.adjustTextX(endX);
-
-    gsap.to(item.mesh.position, { x: endX, duration: this.duration });
-    gsap.to(item.textMesh.position, { x: endTextX, duration: this.duration });
+    this.move(item, this.getTopX() - 10);
 
     const iterator = this.stack.iterator();
     while (iterator.hasNext()) {
       const current = iterator.next();
-
-      const nodeNewX = current.x - this.nodeWidth;
-      const textNewX = this.adjustTextX(nodeNewX);
-
-      gsap.to(current.mesh.position, {
-        x: nodeNewX,
-        duration: this.duration,
-      });
-      gsap.to(current.textMesh.position, {
-        x: textNewX,
-        duration: this.duration,
-      });
+      this.move(current, current.x - this.nodeWidth);
     }
 
     await wait(this.duration);
     item.hide();
-    return Promise.resolve();
   }
 
   private playPeek(item: TextCube<T> | undefined): Promise<void> {
