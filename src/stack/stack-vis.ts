@@ -69,17 +69,17 @@ export default class StackVis<T> implements Stack<T> {
 
   async push(value: T): Promise<number> {
     const item = this.createAndInitItemPosition(value);
-    await this.playPushElements([item]);
+    await this.playPush([item]);
     return this.stack.push(item);
   }
 
   async pushElements(elements: T[]): Promise<void> {
     const items = elements.map(e => this.createAndInitItemPosition(e));
-    await this.playPushElements(items);
+    await this.playPush(items);
     items.map(item => this.stack.push(item));
   }
 
-  private async playPushElements(items: TextCube<T>[]): Promise<void> {
+  private async playPush(items: TextCube<T>[]): Promise<void> {
     await this.shiftNodesForPush(items.length);
 
     items.map((item, i) => {
