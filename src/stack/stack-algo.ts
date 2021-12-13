@@ -1,7 +1,7 @@
 import { AbstractArray, Iterable } from '../commons';
-import IStack from './stack';
+import { IStack } from './stack';
 
-export default class Stack<T>
+export class StackAlgo<T>
   extends AbstractArray<T>
   implements IStack<T>, Iterable<T>
 {

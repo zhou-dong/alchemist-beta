@@ -1,4 +1,4 @@
-import Stack from '../stack-algo';
+import { StackAlgo as Stack } from '../stack-algo';
 
 test('stack push and pop as FILO', async () => {
   const stack = new Stack<number>();

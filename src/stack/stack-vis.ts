@@ -2,10 +2,10 @@ import gsap from 'gsap';
 import * as THREE from 'three';
 import { Cube, TextCube } from '../commons/three';
 import { wait } from '../commons';
-import Stack from './stack';
-import StackAlgo from './stack-algo';
+import { IStack } from './stack';
+import { StackAlgo } from './stack-algo';
 
-export default class StackVis<T> implements Stack<T> {
+export class StackVis<T> implements IStack<T> {
   private stack: StackAlgo<TextCube<T>>;
   private stackShell: StackAlgo<Cube>;
   private stackPosition: THREE.Vector3;
