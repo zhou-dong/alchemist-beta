@@ -1,6 +1,6 @@
 import gsap from 'gsap';
 import * as THREE from 'three';
-import { Cube, TextCube } from '../commons/three';
+import { Cube, NodeParams, ShellParams, TextCube } from '../commons/three';
 import { wait } from '../commons';
 import { IStack } from './stack';
 import { StackAlgo } from './stack-algo';
@@ -8,63 +8,39 @@ import { StackAlgo } from './stack-algo';
 export class StackVis<T> implements IStack<T> {
   private stack: StackAlgo<TextCube<T>>;
   private stackShell: StackAlgo<Cube>;
-  private stackPosition: THREE.Vector3;
-  private stackShellSize: number;
-
-  private nodeMaterial: THREE.Material;
-  private nodeTextMaterial: THREE.Material;
-  private nodeTextGeometryParameters: THREE.TextGeometryParameters;
-  private nodeInitPosition: THREE.Vector3;
-  private nodeTextAdjust: THREE.Vector3;
-  private nodeWidth: number;
-  private nodeHeight: number;
-  private nodeDepth: number;
-
+  private nodeParams: NodeParams;
+  private shellParams: ShellParams;
   private scene: THREE.Scene;
   private duration: number;
 
   constructor(
-    stackMaterial: THREE.Material,
-    stackPosition: THREE.Vector3,
-    stackShellSize: number,
-    nodeMaterial: THREE.Material,
-    nodeTextMaterial: THREE.Material,
-    nodeTextGeometryParameters: THREE.TextGeometryParameters,
-    nodeInitPosition: THREE.Vector3,
-    nodeTextAdjust: THREE.Vector3,
-    nodeWidth: number,
-    nodeHeight: number,
-    nodeDepth: number,
+    nodeParams: NodeParams,
+    shellParams: ShellParams,
     scene: THREE.Scene,
     duration: number
   ) {
-    this.stackPosition = stackPosition;
-    this.stackShellSize = stackShellSize;
-    this.nodeMaterial = nodeMaterial;
-    this.nodeTextMaterial = nodeTextMaterial;
-    this.nodeTextGeometryParameters = nodeTextGeometryParameters;
-    this.nodeInitPosition = nodeInitPosition;
-    this.nodeTextAdjust = nodeTextAdjust;
-    this.nodeWidth = nodeWidth;
-    this.nodeHeight = nodeHeight;
-    this.nodeDepth = nodeDepth;
+    this.nodeParams = nodeParams;
+    this.shellParams = shellParams;
     this.scene = scene;
     this.duration = duration;
     this.stack = new StackAlgo();
-    this.stackShell = new StackAlgo();
-    this.buildStackShell(stackMaterial);
+    this.stackShell = this.buildStackShell();
   }
 
-  private buildStackShell(material: THREE.Material) {
-    const { x, y, z } = this.stackPosition;
-    for (let i = 0; i < this.stackShellSize; i++) {
+  private buildStackShell() {
+    const shell = new StackAlgo<Cube>();
+    const { material, position, size } = this.shellParams;
+    const { width } = this.nodeParams;
+    const { x, y, z } = position;
+    for (let i = 0; i < size; i++) {
       const cube = new Cube(this.buildBoxGeometry(), material, this.scene);
-      cube.x = x - this.nodeWidth * i;
+      cube.x = x - width * i;
       cube.y = y;
       cube.z = z;
       cube.show();
       this.stackShell.push(cube);
     }
+    return shell;
   }
 
   async push(value: T): Promise<number> {
@@ -80,11 +56,12 @@ export class StackVis<T> implements IStack<T> {
   }
 
   private async playPush(items: TextCube<T>[]): Promise<void> {
+    const { width } = this.nodeParams;
     await this.shiftNodesForPush(items.length);
 
     items.map((item, i) => {
       item.show();
-      this.move(item, this.getTopX() + (items.length - 1 - i) * this.nodeWidth);
+      this.move(item, this.getTopX() + (items.length - 1 - i) * width);
     });
 
     await wait(this.duration);
@@ -99,9 +76,9 @@ export class StackVis<T> implements IStack<T> {
   private createItem(value: T): TextCube<T> {
     return new TextCube<T>(
       value,
-      this.nodeTextMaterial,
-      this.nodeTextGeometryParameters,
-      this.nodeMaterial,
+      this.nodeParams.textMaterial,
+      this.nodeParams.textGeometryParameters,
+      this.nodeParams.material,
       this.buildBoxGeometry(),
       this.scene
     );
@@ -113,9 +90,10 @@ export class StackVis<T> implements IStack<T> {
   }
 
   private initItemNodePosition(item: TextCube<T>): void {
-    item.x = this.nodeInitPosition.x;
-    item.y = this.nodeInitPosition.y;
-    item.z = this.nodeInitPosition.z;
+    const { x, y, z } = this.nodeParams.initPosition;
+    item.x = x;
+    item.y = y;
+    item.z = z;
   }
 
   private initItemTextPosition(item: TextCube<T>): void {
@@ -125,11 +103,8 @@ export class StackVis<T> implements IStack<T> {
   }
 
   private buildBoxGeometry(): THREE.BoxGeometry {
-    return new THREE.BoxGeometry(
-      this.nodeWidth,
-      this.nodeHeight,
-      this.nodeDepth
-    );
+    const { width, height, depth } = this.nodeParams;
+    return new THREE.BoxGeometry(width, height, depth);
   }
 
   async pop(): Promise<T | undefined> {
@@ -155,18 +130,21 @@ export class StackVis<T> implements IStack<T> {
   }
 
   private adjustTextX(x: number): number {
-    return x - this.nodeWidth / 2.7 + this.nodeTextAdjust.x;
+    const { width, textAdjust } = this.nodeParams;
+    return x - width / 2.7 + textAdjust.x;
   }
 
   private adjustTextY(y: number): number {
-    return y - this.nodeHeight / 2 + this.nodeTextAdjust.y;
+    const { height, textAdjust } = this.nodeParams;
+    return y - height / 2 + textAdjust.y;
   }
 
   private async shiftNodesForPush(nodes: number): Promise<void> {
+    const { width } = this.nodeParams;
     const iterator = this.stack.iterator();
     while (iterator.hasNext()) {
       const current = iterator.next();
-      this.move(current, current.x + this.nodeWidth * nodes);
+      this.move(current, current.x + width * nodes);
     }
 
     await wait(this.duration);
@@ -180,9 +158,10 @@ export class StackVis<T> implements IStack<T> {
   }
 
   private getTopX(): number {
-    const { x } = this.stackPosition;
-    const size = this.stackShellSize;
-    return x - this.nodeWidth * (size - 1);
+    const { width } = this.nodeParams;
+    const { position, size } = this.shellParams;
+    const { x } = position;
+    return x - width * (size - 1);
   }
 
   private playPop(item: TextCube<T> | undefined): Promise<void> {
@@ -194,12 +173,13 @@ export class StackVis<T> implements IStack<T> {
   }
 
   private async playPopItem(item: TextCube<T>): Promise<void> {
+    const { width } = this.nodeParams;
     this.move(item, this.getTopX() - 10);
 
     const iterator = this.stack.iterator();
     while (iterator.hasNext()) {
       const current = iterator.next();
-      this.move(current, current.x - this.nodeWidth);
+      this.move(current, current.x - width);
     }
 
     await wait(this.duration);
