@@ -1,10 +1,7 @@
-import { AbstractArray, Iterable } from '../commons';
+import { AbstractArray } from '../commons';
 import IQueue from './queue';
 
-export default class Queue<T>
-  extends AbstractArray<T>
-  implements IQueue<T>, Iterable<T>
-{
+export default class Queue<T> extends AbstractArray<T> implements IQueue<T> {
   constructor() {
     super([]);
   }
