@@ -7,7 +7,6 @@ import { StackAlgo } from './stack-algo';
 
 export class StackVis<T> implements IStack<T> {
   private stack: StackAlgo<TextCube<T>>;
-  private stackShell: StackAlgo<Cube>;
   private nodeParams: NodeParams;
   private shellParams: ShellParams;
   private scene: THREE.Scene;
@@ -24,7 +23,7 @@ export class StackVis<T> implements IStack<T> {
     this.scene = scene;
     this.duration = duration;
     this.stack = new StackAlgo();
-    this.stackShell = this.buildStackShell();
+    this.buildStackShell();
   }
 
   private buildStackShell() {
@@ -38,9 +37,8 @@ export class StackVis<T> implements IStack<T> {
       cube.y = y;
       cube.z = z;
       cube.show();
-      this.stackShell.push(cube);
+      shell.push(cube);
     }
-    return shell;
   }
 
   async push(value: T): Promise<number> {
