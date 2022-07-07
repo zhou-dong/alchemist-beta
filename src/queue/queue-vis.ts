@@ -1,5 +1,6 @@
 import gsap from 'gsap';
 import * as THREE from 'three';
+import { TextGeometryParameters } from "three/examples/jsm/geometries/TextGeometry";
 import { Cube, TextCube } from '../commons/three';
 import { wait } from '../commons';
 import Queue from './queue';
@@ -12,7 +13,7 @@ export default class QueueVis<T> implements Queue<T> {
 
   private nodeMaterial: THREE.Material;
   private nodeTextMaterial: THREE.Material;
-  private nodeTextGeometryParameters: THREE.TextGeometryParameters;
+  private nodeTextGeometryParameters: TextGeometryParameters;
   private nodeInitPosition: THREE.Vector3;
   private nodeTextAdjust: THREE.Vector3;
   private nodeWidth: number;
@@ -28,7 +29,7 @@ export default class QueueVis<T> implements Queue<T> {
     queueShellSize: number,
     nodeMaterial: THREE.Material,
     nodeTextMaterial: THREE.Material,
-    nodeTextGeometryParameters: THREE.TextGeometryParameters,
+    nodeTextGeometryParameters: TextGeometryParameters,
     nodeInitPosition: THREE.Vector3,
     nodeTextAdjust: THREE.Vector3,
     nodeWidth: number,
