@@ -1,6 +1,6 @@
 {
     "name": "alchemist-data-structures",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "devDependencies": {
         "@types/jest": "^27.0.1",
         "@types/node": "^14.11.2",
