@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { TextGeometryParameters } from "three/examples/jsm/geometries/TextGeometry";
+import { TextGeometryParameters } from 'three/examples/jsm/geometries/TextGeometry';
 
 export interface NodeParams {
   width: number;

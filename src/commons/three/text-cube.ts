@@ -1,5 +1,8 @@
 import * as THREE from 'three';
-import { TextGeometry, TextGeometryParameters } from "three/examples/jsm/geometries/TextGeometry";
+import {
+  TextGeometry,
+  TextGeometryParameters,
+} from 'three/examples/jsm/geometries/TextGeometry';
 import { Cube } from './cube';
 import { TextCube as ITextCube } from '../text-cube';
 
@@ -18,10 +21,7 @@ export class TextCube<T> extends Cube implements ITextCube<T> {
     super(cubeGeometry, cubeMaterial, scene);
     this._value = value;
 
-    const textGeometry = new TextGeometry(
-      value + '',
-      textGeometryParameters
-    );
+    const textGeometry = new TextGeometry(value + '', textGeometryParameters);
     this.textMesh = new THREE.Mesh(textGeometry, textMaterial);
   }
 

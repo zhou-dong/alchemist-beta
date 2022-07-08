@@ -1,6 +1,6 @@
 import gsap from 'gsap';
 import * as THREE from 'three';
-import { TextGeometryParameters } from "three/examples/jsm/geometries/TextGeometry";
+import { TextGeometryParameters } from 'three/examples/jsm/geometries/TextGeometry';
 import { Cube, TextCube } from '../commons/three';
 import { wait } from '../commons';
 import Queue from './queue';
